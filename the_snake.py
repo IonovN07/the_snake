@@ -43,7 +43,7 @@ class GameObject:
         """Метод инициализотор атрибутов экземплера класса."""
         if not position and not body_color:
             raise ValueError(
-                'Необходимо указать параметры объекта %s.' 
+                'Необходимо указать параметры объекта %s.'
                 % (self.__class__.__name__))
         self.position = position
         self.body_color = body_color
@@ -57,22 +57,23 @@ class GameObject:
 class Apple(GameObject):
     """Класс описывающий яблоко на игровом поле."""
 
-    def __init__(self, position = CENTER, body_color = APPLE_COLOR) -> None:
+    def __init__(self, snake_position: tuple = None, body_color: tuple = APPLE_COLOR) -> None:
         """Метод инициализатор атрибутов объекта яблоко."""
         super().__init__(body_color = body_color)
-        self.position = self.randomize_position()
+        self.randomize_position(snake_position)
 
-    def randomize_position(self) -> tuple:
+    def randomize_position(self, snake_position) -> tuple:
         """Метод генерации случайного положения объекта яблоко."""
-        position_not_center = True
-        while position_not_center:
+        while True:
             self.position = (
                 randint(0, GRID_WIDTH - 1) * GRID_SIZE,
                 randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
-            if self.position != CENTER:
-                position_not_center = False
-        return self.position
-
+            for self.position in snake_position:
+                continue
+            else:
+                return self.position
+                
+        
     def draw(self) -> None:
         """Метод отрисовки объекта яблоко."""
         rect = pg.Rect(self.position, (GRID_SIZE, GRID_SIZE))
@@ -85,7 +86,7 @@ class Snake(GameObject):
 
     length = 1
 
-    def __init__(self, position = CENTER, body_color = SNAKE_COLOR) -> None:
+    def __init__(self, position: tuple = CENTER, body_color: tuple = SNAKE_COLOR) -> None:
         """Метод инициализатор атрибутов объекта змейка."""
         super().__init__(position, body_color)
         self.positions = [self.position]
@@ -130,7 +131,6 @@ class Snake(GameObject):
         self.length = 1
         self.positions = [self.position]
         self.direction = choice(ALL_DIRECTION)
-        screen.fill(BOARD_BACKGROUND_COLOR)
 
     def draw(self) -> None:
         """Метод отрисовки объекта змейки, проверка состояния
@@ -177,16 +177,17 @@ def main():
     """Функция запуска игрового процесса."""
     pg.init()
     snake = Snake()
-    apple = Apple()
+    apple = Apple(snake.positions)
     while True:
         clock.tick(SPEED)
         handle_keys(snake)
         snake.move()
         if snake.get_head_position() == apple.position:
             snake.length += 1
-            apple.randomize_position()
+            apple.randomize_position(snake.positions)
         elif snake.positions[0] in snake.positions[4:]:
             snake.reset()
+            screen.fill(BOARD_BACKGROUND_COLOR)
         apple.draw()
         snake.draw()
         pg.display.update()
