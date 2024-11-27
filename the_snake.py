@@ -30,6 +30,7 @@ BOARD_BACKGROUND_COLOR = (128, 128, 128)
 BORDER_COLOR = (93, 216, 228)
 APPLE_COLOR = (255, 0, 0)
 SNAKE_COLOR = (0, 255, 0)
+STONE_COLOR = (63, 161, 119)
 
 # Скорость движения змейки:
 SPEED = 10
@@ -70,10 +71,12 @@ class GameObject:
 class Apple(GameObject):
     """Класс описывающий яблоко на игровом поле."""
 
-    def __init__(self, body_color: tuple = APPLE_COLOR) -> None:
+    def __init__(
+            self, positions_taken: tuple = CENTER,
+            body_color: tuple = APPLE_COLOR) -> None:
         """Метод инициализатор атрибутов объекта яблоко."""
-        super().__init__(body_color = body_color)
-        self.randomize_position(self.position)
+        super().__init__(body_color)
+        self.randomize_position(positions_taken)
 
     def randomize_position(self, positions_taken) -> tuple:
         """Метод генерации случайного положения объекта яблоко."""
@@ -83,13 +86,11 @@ class Apple(GameObject):
                 randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
             if self.position in positions_taken:
                 continue
-            else:
-                return self.position
+            break
 
     def draw(self) -> None:
         """Метод отрисовки объекта яблоко."""
         self.draw_cell(self.position)
-        
 
 
 class Snake(GameObject):
@@ -107,9 +108,10 @@ class Snake(GameObject):
         """
         x_position, y_position = self.get_head_position()
         x_next_position, y_next_position = self.direction
-        self.positions.insert(0, 
+        self.positions.insert(
+            0,
             ((x_position + x_next_position * GRID_SIZE) % SCREEN_WIDTH,
-            (y_position + y_next_position * GRID_SIZE) % SCREEN_HEIGHT))
+             (y_position + y_next_position * GRID_SIZE) % SCREEN_HEIGHT))
         # Проверка длины змейки
         if self.length < len(self.positions):
             self.last = self.positions.pop()
@@ -135,7 +137,6 @@ class Snake(GameObject):
         """
         # Отрисовка головы змейки
         self.draw_cell(self.get_head_position())
-        
         # Затирание последнего сегмента
         if self.last:
             self.draw_cell(
@@ -152,8 +153,7 @@ def handle_keys(snake) -> None:
             if event.key == pg.K_ESCAPE:
                 pg.quit()
             snake.update_direction(
-                    TURNS.get((snake.direction, event.key), UP))
-            
+                TURNS.get((snake.direction, event.key), UP))
 
 
 def main():
