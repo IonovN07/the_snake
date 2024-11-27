@@ -80,13 +80,10 @@ class Apple(GameObject):
 
     def randomize_position(self, positions_taken) -> tuple:
         """Метод генерации случайного положения объекта яблоко."""
-        while True:
+        while self.position in positions_taken:
             self.position = (
                 randint(0, GRID_WIDTH - 1) * GRID_SIZE,
                 randint(0, GRID_HEIGHT - 1) * GRID_SIZE)
-            if self.position in positions_taken:
-                continue
-            break
 
     def draw(self) -> None:
         """Метод отрисовки объекта яблоко."""
@@ -152,15 +149,16 @@ def handle_keys(snake) -> None:
         if event.type == pg.KEYDOWN:
             if event.key == pg.K_ESCAPE:
                 pg.quit()
+                raise SystemExit
             snake.update_direction(
-                TURNS.get((snake.direction, event.key), UP))
+                TURNS.get((snake.direction, event.key), snake.direction))
 
 
 def main():
     """Функция запуска игрового процесса."""
     pg.init()
     snake = Snake()
-    apple = Apple()
+    apple = Apple(snake.positions)
     while True:
         clock.tick(SPEED)
         handle_keys(snake)
